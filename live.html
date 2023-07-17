@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Live Language Translation</title>
+</head>
+<body>
+    <h1>Live Language Translation</h1>
+
+    <div>
+        <button id="startButton">Start</button>
+        <button id="stopButton">Stop</button>
+    </div>
+
+    <div>
+        <label for="inputText">Input Text:</label>
+        <textarea id="inputText" rows="4" cols="50"></textarea>
+    </div>
+
+    <div>
+        <label for="translatedText">Translated Text:</label>
+        <textarea id="translatedText" rows="4" cols="50"></textarea>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const inputText = document.getElementById('inputText');
+        const translatedText = document.getElementById('translatedText');
+
+        let recognition;
+        let translator;
+
+        // Check if the browser supports the Web Speech API
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+
+            // Configure the recognition settings
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US'; // Source language
+
+            // Handle the recognized speech
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript;
+                inputText.value = transcript;
+
+                // Translate the recognized text
+                translator.translate(transcript, {to: 'fr'}) // Target language
+                    .then(result => {
+                        translatedText.value = result.text;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+            };
+        } else {
+            console.log('Web Speech API not supported');
+        }
+
+        // Initialize the translator
+        function initializeTranslator() {
+            const googleTranslateApiKey = 'YOUR_API_KEY'; // Replace with your actual API key
+            translator = new google.translate.Translate(googleTranslateApiKey);
+        }
+
+        // Start the recognition
+        startButton.addEventListener('click', function() {
+            if (recognition) {
+                recognition.start();
+            }
+        });
+
+        // Stop the recognition
+        stopButton.addEventListener('click', function() {
+            if (recognition) {
+                recognition.stop();
+            }
+        });
+
+        // Initialize the translator
+        initializeTranslator();
+    </script>
+</body>
+</html>
